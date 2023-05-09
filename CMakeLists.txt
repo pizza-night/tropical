@@ -19,6 +19,33 @@ add_executable("tropical" ${HEADERS} ${SOURCES})
 target_include_directories("tropical" PRIVATE ${INCLUDE_PATH})
 
 # 3rd Party Libraries
+# cxxopts
+find_package(cxxopts CONFIG REQUIRED)
+target_link_libraries("tropical" PRIVATE cxxopts::cxxopts)
+
+# fmt
+find_package(fmt CONFIG REQUIRED)
+target_link_libraries("tropical" PRIVATE fmt::fmt)
+
+# moodycamel::ConcurrentQueue
+find_package(unofficial-concurrentqueue CONFIG REQUIRED)
+target_link_libraries("tropical" PRIVATE unofficial::concurrentqueue::concurrentqueue)
+
+# mood::readerwriterqueue
+include(FetchContent)
+FetchContent_Declare(
+  readerwriterqueue
+  GIT_REPOSITORY    https://github.com/cameron314/readerwriterqueue
+  GIT_TAG           master
+)
+FetchContent_MakeAvailable(readerwriterqueue)
+add_library("spscqueue" "${INCLUDE_PATH}/util/spsc_queue.hpp")
+set_target_properties("spscqueue" PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries("tropical" PRIVATE readerwriterqueue)
+
+# toml++
+find_package(tomlplusplus CONFIG REQUIRED)
+target_link_libraries("tropical" PRIVATE tomlplusplus::tomlplusplus)
 
 # Precompiled Headers
 target_precompile_headers("tropical" PRIVATE)

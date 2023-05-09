@@ -1,6 +1,23 @@
 {
     "name": "tropical",
     "version": "0.1.0",
-    "dependencies": [],
+    "dependencies": [
+        {
+            "name": "concurrentqueue",
+            "version>=": "1.0.3#1"
+        },
+        {
+            "name": "cxxopts",
+            "version>=": "3.1.1"
+        },
+        {
+            "name": "fmt",
+            "version>=": "9.1.0#1"
+        },
+        {
+            "name": "tomlplusplus",
+            "version>=": "3.1.0"
+        }
+    ],
     "builtin-baseline": "ea222747b888b8d63df56240b262db38b095c68f"
 }
