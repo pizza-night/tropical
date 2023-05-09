@@ -5,6 +5,22 @@
 #include <iterator>
 #include <string>
 
+class Lines {
+  private:
+    std::istream& input;
+
+    explicit Lines(std::istream& input) noexcept;
+
+  public:
+    struct Sentinel {};
+
+    static Lines of(std::istream& input) noexcept;
+
+    class LineIter begin() noexcept;
+
+    Sentinel end() const noexcept;
+};
+
 class LineIter {
   private:
     std::istream* input;
@@ -14,8 +30,6 @@ class LineIter {
     explicit LineIter(std::istream& input) noexcept;
 
   public:
-    struct Sentinel {};
-
     using difference_type = std::ptrdiff_t;
     using value_type = std::string;
     using pointer = value_type*;
@@ -34,19 +48,5 @@ class LineIter {
 
     LineIter& operator++();
 
-    bool operator==(Sentinel) const noexcept;
-};
-
-class Lines {
-  private:
-    std::istream& input;
-
-    explicit Lines(std::istream& input) noexcept;
-
-  public:
-    static Lines of(std::istream& input) noexcept;
-
-    LineIter begin() noexcept;
-
-    LineIter::Sentinel end() const noexcept;
+    bool operator==(Lines::Sentinel) const noexcept;
 };

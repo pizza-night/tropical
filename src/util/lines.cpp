@@ -3,6 +3,20 @@
 #include <istream>
 #include <utility>
 
+Lines::Lines(std::istream& input) noexcept : input(input) {}
+
+Lines Lines::of(std::istream& input) noexcept {
+    return Lines(input);
+}
+
+LineIter Lines::begin() noexcept {
+    return LineIter(this->input);
+}
+
+Lines::Sentinel Lines::end() const noexcept {
+    return Sentinel();
+}
+
 LineIter::LineIter(std::istream& input) noexcept : input(&input), line_buf() {
     ++(*this);
 }
@@ -34,20 +48,6 @@ LineIter& LineIter::operator++() {
     return *this;
 }
 
-bool LineIter::operator==(Sentinel) const noexcept {
+bool LineIter::operator==(Lines::Sentinel) const noexcept {
     return this->input == nullptr;
-}
-
-Lines::Lines(std::istream& input) noexcept : input(input) {}
-
-Lines Lines::of(std::istream& input) noexcept {
-    return Lines(input);
-}
-
-LineIter Lines::begin() noexcept {
-    return LineIter(this->input);
-}
-
-LineIter::Sentinel Lines::end() const noexcept {
-    return LineIter::Sentinel();
 }
