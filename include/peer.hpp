@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 extern "C" {
@@ -9,8 +10,9 @@ extern "C" {
 namespace tropical {
 
 struct Peer {
-    std::string name;
-    in6_addr ip_addr;
+    std::string addr;
+    std::optional<in_port_t> port;
+    std::optional<std::string> name;
 };
 
 } // namespace tropical
