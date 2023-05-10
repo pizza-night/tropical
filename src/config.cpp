@@ -161,7 +161,7 @@ auto Config::load_from_path(std::filesystem::path path)
     }
 
     toml::array const* const peers_array = config[key_peers].as_array();
-    if (not peers_array->is_array_of_tables()) {
+    if (not (peers_array->empty() or peers_array->is_array_of_tables())) {
         return std::unexpected(ParseErr(
             std::move(path),
             "expected 'peers' to be an array of tables",
