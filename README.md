@@ -1,2 +1,1 @@
-# tropical
-Implementation of the PIZZA protocol.
+![](https://i.imgur.com/WFn5KgT.png)
