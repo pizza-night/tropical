@@ -158,7 +158,12 @@ auto Config::load_from_path(std::filesystem::path path)
         return std::unexpected(MissingPortErr(std::move(path)));
     }
 
+    std::vector<Peer> peers;
     toml::array const* const peers_array = config[key_peers].as_array();
+    if (! peers_array) {
+        return Config(std::move(peers), *port);
+    }
+
     if (not (peers_array->empty() or peers_array->is_array_of_tables())) {
         return std::unexpected(ParseErr(
             std::move(path),
@@ -166,8 +171,6 @@ auto Config::load_from_path(std::filesystem::path path)
             config.source().begin.line
         ));
     }
-
-    std::vector<Peer> peers;
 
     static constexpr auto to_table
         = [](toml::node const& node) noexcept -> toml::table const& {
