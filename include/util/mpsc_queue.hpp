@@ -12,22 +12,28 @@
 namespace tropical {
 
 template <std::move_constructible T>
-class MpscQueue
-  : protected moodycamel::ConcurrentQueue<T>
-  , public EventFd {
+class MpscQueue {
+  private:
+    moodycamel::ConcurrentQueue<T> impl;
+    EventFd event_fd;
+
   public:
-    void enqueue(T&& item) {
-        if (! moodycamel::ConcurrentQueue<T>::enqueue(std::move(item))) {
+    void enqueue(T item) {
+        if (! this->impl.enqueue(std::move(item))) {
             throw std::bad_alloc();
         }
-        EventFd::mark_write();
+        this->event_fd.mark_write();
     }
 
     T dequeue() {
         Uninit<T> slot;
-        assert(moodycamel::ConcurrentQueue<T>::try_dequeue(slot.value));
-        EventFd::mark_read();
+        assert(impl.try_dequeue(slot.value));
+        this->event_fd.mark_read();
         return std::move(slot.value);
+    }
+
+    int fd() noexcept {
+        return this->event_fd.fd();
     }
 };
 
