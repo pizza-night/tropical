@@ -29,12 +29,12 @@ port = 2504
 #   - 'name': optional string used to identify the peer.
 #   - 'address': string containing the IP address or hostname of the peer.
 #   - 'port': optional port on which the peer is listening. If omitted, defaults
-              to the value of the 'port' field above.
+#             to the value of the 'port' field above.
 #
 # Example:
 # peers = [
 #     { name = "me",    address = "localhost",   port = 2505 },
-#     { name = "alice", address = "192.168.1.1",             },
+#     { name = "alice", address = "192.168.1.1"              },
 #     {                 address = "example.com", port = 80   },
 # ]
 peers = []
