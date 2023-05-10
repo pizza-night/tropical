@@ -31,12 +31,13 @@ class Config {
         };
     };
 
-    static auto generate_default_config() -> std::expected<void, Error::IO>;
+    static auto generate_default_config()
+        -> std::expected<std::filesystem::path, Error::IO>;
 
     static auto load_default() -> std::expected<Config, Error::IO>;
 
     static auto load_from_path(std::filesystem::path config_path)
-            -> std::expected<Config, Error::IO>;
+        -> std::expected<Config, Error::IO>;
 
     auto peers() const noexcept -> std::span<Peer const>;
 

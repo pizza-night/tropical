@@ -10,7 +10,7 @@
 
 using namespace tropical;
 
-#define PRINT_PROG_ERR(fmt_str, ...)                                           \
+#define PROG_PRINT_ERR(fmt_str, ...)                                           \
     fmt::print(                                                                \
         stderr,                                                                \
         "{}: {}: " fmt_str,                                                    \
@@ -20,6 +20,15 @@ using namespace tropical;
         ),                                                                     \
         fmt::styled("error", fmt::emphasis::bold | fmt::fg(fmt::color::red))   \
             __VA_OPT__(, ) __VA_ARGS__                                         \
+    )
+
+#define PROG_PRINT(fmt_strm, ...)                                              \
+    fmt::print(                                                                \
+        "{}: " fmt_strm,                                                       \
+        fmt::styled(                                                           \
+            "tropical",                                                        \
+            fmt::emphasis::bold | fmt::fg(fmt::color::white)                   \
+        ) __VA_OPT__(, ) __VA_ARGS__                                           \
     )
 
 int main(int argc, char* argv[]) try {
@@ -65,13 +74,14 @@ int main(int argc, char* argv[]) try {
         auto res = Config::generate_default_config();
         if (! res) {
             auto const& [path, err] = res.error();
-            PRINT_PROG_ERR(
+            PROG_PRINT_ERR(
                 "failed to generate default configuration at '{}': {}\n",
                 path.native(),
                 err.message()
             );
             return EXIT_FAILURE;
         }
+        PROG_PRINT("generated default configuration at '{}'\n", res->native());
         return EXIT_SUCCESS;
     }
 
@@ -85,7 +95,7 @@ int main(int argc, char* argv[]) try {
 
     if (! config) {
         auto const& [path, err] = config.error();
-        PRINT_PROG_ERR(
+        PROG_PRINT_ERR(
             "failed to load configuration '{}': {}\n",
             path.native(),
             err.message()
@@ -101,6 +111,6 @@ int main(int argc, char* argv[]) try {
         return EXIT_FAILURE;
     }
 } catch (std::exception const& e) {
-    PRINT_PROG_ERR("{}\n", e.what());
+    PROG_PRINT_ERR("{}\n", e.what());
     return EXIT_FAILURE;
 }

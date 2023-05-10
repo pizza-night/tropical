@@ -67,7 +67,8 @@ Config::Error::IO::IO(
 Config::Config(std::vector<Peer>&& peers, in_port_t const port) noexcept
   : m_peers(std::move(peers)), m_port(port) {}
 
-auto Config::generate_default_config() -> std::expected<void, Error::IO> {
+auto Config::generate_default_config()
+    -> std::expected<std::filesystem::path, Error::IO> {
     std::filesystem::path config_dir;
     find_default_config_path(config_dir);
 
@@ -84,7 +85,7 @@ auto Config::generate_default_config() -> std::expected<void, Error::IO> {
         return std::unexpected(Error::IO(std::move(config_dir), e.code()));
     }
 
-    return {};
+    return config_dir;
 }
 
 auto Config::load_default() -> std::expected<Config, Config::Error::IO> {
