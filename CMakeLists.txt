@@ -55,7 +55,6 @@ target_precompile_headers("tropical" PRIVATE
     "${INCLUDE_PATH}/util/overload.hpp"
     "${INCLUDE_PATH}/util/spsc_queue.hpp"
     "${INCLUDE_PATH}/util/strerror_mt.hpp"
-    "${INCLUDE_PATH}/util/term_style.hpp"
     "${INCLUDE_PATH}/util/todo.hpp"
     "${INCLUDE_PATH}/util/uninit.hpp"
     "<arpa/inet.h>"

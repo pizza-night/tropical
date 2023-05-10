@@ -1,11 +1,11 @@
 #include "config.hpp"
 #include "prog_info.hpp"
-#include "util/term_style.hpp"
 
 #include <cstdlib>
 #include <cxxopts.hpp>
 #include <exception>
 #include <filesystem>
+#include <fmt/color.h>
 #include <fmt/core.h>
 
 using namespace tropical;
@@ -14,8 +14,12 @@ using namespace tropical;
     fmt::print(                                                                \
         stderr,                                                                \
         "{}: {}: " fmt_str,                                                    \
-        BOLD_WHITE("tropical"),                                                \
-        BOLD_RED("error") __VA_OPT__(, ) __VA_ARGS__                           \
+        fmt::styled(                                                           \
+            "tropical",                                                        \
+            fmt::emphasis::bold | fmt::fg(fmt::color::white)                   \
+        ),                                                                     \
+        fmt::styled("error", fmt::emphasis::bold | fmt::fg(fmt::color::red))   \
+            __VA_OPT__(, ) __VA_ARGS__                                         \
     )
 
 int main(int argc, char* argv[]) try {
