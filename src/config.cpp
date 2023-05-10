@@ -132,8 +132,8 @@ auto Config::load_from_path(std::filesystem::path path)
     -> std::expected<Config, Error> {
     static constexpr std::string_view key_port = "port";
     static constexpr std::string_view key_peers = "peers";
-    static constexpr std::string_view key_addr = "address";
     static constexpr std::string_view key_name = "name";
+    static constexpr std::string_view key_addr = "address";
 
     auto file = std::ifstream(path);
     if (! file) {
@@ -151,8 +151,6 @@ auto Config::load_from_path(std::filesystem::path path)
             err.source().begin.line
         ));
     }
-
-    // std::vector<Peer> peers;
 
     toml::table const& config = res.table();
     std::optional port = config[key_port].value<in_port_t>();

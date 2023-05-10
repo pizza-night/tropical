@@ -11,6 +11,15 @@
 
 using namespace tropical;
 
+#define PROG_PRINT(fmt_strm, ...)                                              \
+    fmt::print(                                                                \
+        "{}: " fmt_strm,                                                       \
+        fmt::styled(                                                           \
+            "tropical",                                                        \
+            fmt::emphasis::bold | fmt::fg(fmt::color::white)                   \
+        ) __VA_OPT__(, ) __VA_ARGS__                                           \
+    )
+
 #define PROG_PRINT_ERR(fmt_str, ...)                                           \
     fmt::print(                                                                \
         stderr,                                                                \
@@ -21,15 +30,6 @@ using namespace tropical;
         ),                                                                     \
         fmt::styled("error", fmt::emphasis::bold | fmt::fg(fmt::color::red))   \
             __VA_OPT__(, ) __VA_ARGS__                                         \
-    )
-
-#define PROG_PRINT(fmt_strm, ...)                                              \
-    fmt::print(                                                                \
-        "{}: " fmt_strm,                                                       \
-        fmt::styled(                                                           \
-            "tropical",                                                        \
-            fmt::emphasis::bold | fmt::fg(fmt::color::white)                   \
-        ) __VA_OPT__(, ) __VA_ARGS__                                           \
     )
 
 int main(int argc, char* argv[]) try {
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) try {
         "Print version information and exit"
     )(
         "config",
-        "Path to the configuration file",
+        "Specify the path to the configuration file",
         cxxopts::value<std::filesystem::path>()
     )(
         "generate-config",
@@ -56,12 +56,12 @@ int main(int argc, char* argv[]) try {
 
     cxxopts::ParseResult cli_args = cli_config.parse(argc, argv);
 
-    if (cli_args.count("help")) {
+    if (cli_args.count("help") > 0) {
         fmt::print("{}\n", cli_config.help());
         return EXIT_SUCCESS;
     }
 
-    if (cli_args.count("version")) {
+    if (cli_args.count("version") > 0) {
         fmt::print(
             "tropical {}.{}.{}\n",
             version_major,
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) try {
         return EXIT_SUCCESS;
     }
 
-    if (cli_args.count("generate-config")) {
+    if (cli_args.count("generate-config") > 0) {
         auto res = Config::generate_default_config();
         if (! res) {
             auto const& [path, err] = res.error();
