@@ -1,7 +1,6 @@
 #include "config.hpp"
 #include "prog_info.hpp"
 #include "util/term_style.hpp"
-#include "util/todo.hpp"
 
 #include <cstdlib>
 #include <cxxopts.hpp>
@@ -20,7 +19,6 @@ using namespace tropical;
     )
 
 int main(int argc, char* argv[]) try {
-    todo();
     auto cli_config
         = cxxopts::Options("tropical", "Implementation of the PIZZA protocol.");
 
