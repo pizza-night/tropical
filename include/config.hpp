@@ -19,7 +19,7 @@ class Config {
     std::vector<Peer> m_peers;
     in_port_t m_port;
 
-    Config(std::vector<Peer>&& peers, in_port_t port);
+    Config(std::vector<Peer>&& peers, in_port_t port) noexcept;
 
   public:
     struct Error {

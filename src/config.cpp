@@ -64,7 +64,7 @@ Config::Error::IO::IO(
 ) noexcept
   : path(std::move(path)), kind(kind) {}
 
-Config::Config(std::vector<Peer>&& peers, in_port_t const port)
+Config::Config(std::vector<Peer>&& peers, in_port_t const port) noexcept
   : m_peers(std::move(peers)), m_port(port) {}
 
 auto Config::generate_default_config() -> std::expected<void, Error::IO> {
