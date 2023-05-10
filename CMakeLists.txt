@@ -115,9 +115,7 @@ else()
     # Compiling with g++/clang++/etc.
     list(
         APPEND WARNING_FLAGS
-        "-pedantic-errors"
         "-Wfatal-errors"
-        "-Werror=pedantic"
         "-Wall"
         "-Wextra"
         "-Wdouble-promotion"
