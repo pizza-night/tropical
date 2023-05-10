@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "prog_info.hpp"
+#include "util/overload.hpp"
 
 #include <cstdlib>
 #include <cxxopts.hpp>
@@ -94,23 +95,43 @@ int main(int argc, char* argv[]) try {
                              );
 
     if (! config) {
-        auto const& [path, err] = config.error();
-        PROG_PRINT_ERR(
-            "failed to load configuration '{}': {}\n",
-            path.native(),
-            err.message()
+        auto const& err = config.error();
+        std::visit(
+            overload {
+                [using_default_config](Config::IOErr const& err) {
+                    PROG_PRINT_ERR(
+                        "failed to load configuration '{}': {}\n",
+                        err.path.native(),
+                        err.kind.message()
+                    );
+                    if (using_default_config) {
+                        PROG_PRINT(
+                            "to generate a default configuration, "
+                            "run the following command with root privileges:\n"
+                            "tropical --generate-config\n"
+                        );
+                    }
+                },
+                [](Config::ParseErr const& err) {
+                    PROG_PRINT_ERR(
+                        "failed to parse configuration {}:{}: {}\n",
+                        err.path.native(),
+                        err.line,
+                        err.reason
+                    );
+                },
+                [](Config::MissingPortErr const& err) {
+                    PROG_PRINT_ERR(
+                        "missing port in configuration '{}'\n",
+                        err.path.native()
+                    );
+                },
+            },
+            err
         );
-        if (using_default_config) {
-            fmt::print(
-                stderr,
-                "to generate a default configuration, "
-                "run the following command with root privileges:\n"
-                "\ttropical --generate-config\n"
-            );
-        }
         return EXIT_FAILURE;
     }
-} catch (std::exception const& e) {
-    PROG_PRINT_ERR("{}\n", e.what());
+} catch (std::exception const& err) {
+    PROG_PRINT_ERR("{}\n", err.what());
     return EXIT_FAILURE;
 }

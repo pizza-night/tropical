@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <span>
 #include <system_error>
+#include <variant>
 #include <vector>
 
 extern "C" {
@@ -22,22 +23,52 @@ class Config {
     Config(std::vector<Peer>&& peers, in_port_t port) noexcept;
 
   public:
-    struct Error {
-        struct IO {
-            std::filesystem::path path;
-            std::error_code kind;
+    struct IOErr {
+      private:
+        friend class Config;
 
-            IO(std::filesystem::path&& path, std::error_code kind) noexcept;
-        };
+        IOErr(std::filesystem::path&& path, std::error_code kind) noexcept;
+
+      public:
+        std::filesystem::path path;
+        std::error_code kind;
     };
 
-    static auto generate_default_config()
-        -> std::expected<std::filesystem::path, Error::IO>;
+    struct ParseErr {
+      private:
+        friend class Config;
 
-    static auto load_default() -> std::expected<Config, Error::IO>;
+        ParseErr(
+            std::filesystem::path&& path,
+            std::string&& reason,
+            std::uint32_t line
+        ) noexcept;
+
+      public:
+        std::filesystem::path path;
+        std::string reason;
+        std::uint32_t line;
+    };
+
+    struct MissingPortErr {
+      private:
+        friend class Config;
+
+        explicit MissingPortErr(std::filesystem::path&& path) noexcept;
+
+      public:
+        std::filesystem::path path;
+    };
+
+    using Error = std::variant<IOErr, ParseErr, MissingPortErr>;
+
+    static auto generate_default_config()
+        -> std::expected<std::filesystem::path, IOErr>;
+
+    static auto load_default() -> std::expected<Config, Error>;
 
     static auto load_from_path(std::filesystem::path config_path)
-        -> std::expected<Config, Error::IO>;
+        -> std::expected<Config, Error>;
 
     auto peers() const noexcept -> std::span<Peer const>;
 

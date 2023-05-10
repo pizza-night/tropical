@@ -1,9 +1,13 @@
+#define TOML_EXCEPTIONS 0
+
 #include "config.hpp"
 
-#include "util/todo.hpp"
-
+#include <cerrno>
 #include <fmt/os.h>
+#include <fstream>
+#include <ranges>
 #include <string_view>
+#include <toml++/toml.h>
 #include <utility>
 
 namespace tropical {
@@ -22,15 +26,16 @@ port = 2504
 # Tropical will connect to the peers listed in the 'peers' array.
 # To add a peer, add a new entry to the array.
 # Each entry must be an inline table with the following fields:
-#   - 'host': the hostname or IP address of the peer
-#   - 'port': the port on which the peer is listening. If omitted, defaults to
-#             the value of the 'port' field above.
+#   - 'name': optional string used to identify the peer.
+#   - 'address': string containing the IP address or hostname of the peer.
+#   - 'port': optional port on which the peer is listening. If omitted, defaults
+              to the value of the 'port' field above.
 #
 # Example:
 # peers = [
-#     { host = "192.168.1.1", port = 9999 },
-#     { host = "example.com", port = 1337 },
-#     { host = "localhost"                },
+#     { name = "me",    address = "localhost",   port = 2505 },
+#     { name = "alice", address = "192.168.1.1",             },
+#     {                 address = "example.com", port = 80   },
 # ]
 peers = []
 )";
@@ -58,47 +63,138 @@ void find_default_config_path(std::filesystem::path& path) {
 
 } // namespace
 
-Config::Error::IO::IO(
+Config::IOErr::IOErr(
     std::filesystem::path&& path,
     std::error_code const kind
 ) noexcept
   : path(std::move(path)), kind(kind) {}
 
+Config::ParseErr::ParseErr(
+    std::filesystem::path&& path,
+    std::string&& reason,
+    std::uint32_t const line
+) noexcept
+  : path(std::move(path)), reason(std::move(reason)), line(line) {}
+
+Config::MissingPortErr::MissingPortErr(std::filesystem::path&& path) noexcept
+  : path(std::move(path)) {}
+
 Config::Config(std::vector<Peer>&& peers, in_port_t const port) noexcept
   : m_peers(std::move(peers)), m_port(port) {}
 
 auto Config::generate_default_config()
-    -> std::expected<std::filesystem::path, Error::IO> {
+    -> std::expected<std::filesystem::path, IOErr> {
     std::filesystem::path config_dir;
     find_default_config_path(config_dir);
 
     std::error_code err;
     if (! std::filesystem::create_directories(config_dir.parent_path(), err)
         and err) {
-        return std::unexpected(Error::IO(std::move(config_dir), err));
+        return std::unexpected(IOErr(std::move(config_dir), err));
     }
 
     try {
         fmt::output_file(config_dir.native())
             .print("{}", default_config_contents);
     } catch (std::system_error const& e) {
-        return std::unexpected(Error::IO(std::move(config_dir), e.code()));
+        return std::unexpected(IOErr(std::move(config_dir), e.code()));
     }
 
     return config_dir;
 }
 
-auto Config::load_default() -> std::expected<Config, Config::Error::IO> {
+auto Config::load_default() -> std::expected<Config, Error> {
     std::filesystem::path config_path;
-    if (! find_config_path(config_path)) {
-        find_default_config_path(config_path);
+    if (find_config_path(config_path)) {
+        // ~/.config/tropical/config.toml path is valid, try to load it.
+        std::expected config = Config::load_from_path(std::move(config_path));
+        if (! config) {
+            // If loading the config failed, check if the error was that the
+            // file didn't exist. If so, try to load the default config.
+            Error& err = config.error();
+            IOErr* const io_err = std::get_if<IOErr>(&err);
+            if (io_err != nullptr
+                and io_err->kind == std::errc::no_such_file_or_directory) {
+                // Reuse the path from the error to avoid having to allocate a
+                // new path.
+                config_path = std::move(io_err->path);
+                goto USE_DEFAULT_CONFIG;
+            }
+        }
+        return config;
     }
+USE_DEFAULT_CONFIG:
+    find_default_config_path(config_path);
     return Config::load_from_path(std::move(config_path));
 }
 
-auto Config::load_from_path(std::filesystem::path)
-    -> std::expected<Config, Config::Error::IO> {
-    todo();
+auto Config::load_from_path(std::filesystem::path path)
+    -> std::expected<Config, Error> {
+    static constexpr std::string_view key_port = "port";
+    static constexpr std::string_view key_peers = "peers";
+    static constexpr std::string_view key_addr = "address";
+    static constexpr std::string_view key_name = "name";
+
+    auto file = std::ifstream(path);
+    if (! file) {
+        return std::unexpected(IOErr(
+            std::move(path),
+            std::error_code(errno, std::system_category())
+        ));
+    }
+    toml::parse_result res = toml::parse(file);
+    if (res.failed()) {
+        toml::parse_error& err = res.error();
+        return std::unexpected(ParseErr(
+            std::move(path),
+            std::string(err.description()),
+            err.source().begin.line
+        ));
+    }
+
+    // std::vector<Peer> peers;
+
+    toml::table const& config = res.table();
+    std::optional port = config[key_port].value<in_port_t>();
+    if (! port) {
+        return std::unexpected(MissingPortErr(std::move(path)));
+    }
+
+    toml::array const* const peers_array = config[key_peers].as_array();
+    if (not peers_array->is_array_of_tables()) {
+        return std::unexpected(ParseErr(
+            std::move(path),
+            "expected 'peers' to be an array of tables",
+            config.source().begin.line
+        ));
+    }
+
+    std::vector<Peer> peers;
+
+    static constexpr auto to_table
+        = [](toml::node const& node) noexcept -> toml::table const& {
+        return *node.as_table();
+    };
+    using std::views::transform;
+    for (toml::table const& peer : (*peers_array) | transform(to_table)) {
+        std::optional address = peer[key_addr].value<std::string>();
+
+        if (! address) {
+            return std::unexpected(ParseErr(
+                std::move(path),
+                "missing 'address' field in peer",
+                peer.source().begin.line
+            ));
+        }
+
+        peers.emplace_back(
+            *std::move(address),
+            peer[key_port].value<in_port_t>(),
+            peer[key_name].value<std::string>()
+        );
+    }
+
+    return Config(std::move(peers), *port);
 }
 
 auto Config::peers() const noexcept -> std::span<Peer const> {
