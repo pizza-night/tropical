@@ -31,6 +31,10 @@ class SpscQueue {
         this->event_fd.mark_read();
         return std::move(slot.value);
     }
+
+    int fd() noexcept {
+        return this->event_fd.fd();
+    }
 };
 
 } // namespace tropical
