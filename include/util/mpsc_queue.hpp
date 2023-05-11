@@ -11,7 +11,7 @@
 
 namespace tropical {
 
-template <std::move_constructible T>
+template <std::movable T>
 class MpscQueue {
   private:
     moodycamel::ConcurrentQueue<T> impl;
@@ -27,9 +27,11 @@ class MpscQueue {
 
     T dequeue() {
         Uninit<T> slot;
-        assert(impl.try_dequeue(slot.value));
+        assert(this->impl.try_dequeue(slot));
         this->event_fd.mark_read();
-        return std::move(slot.value);
+        T value = std::move(slot.value);
+        slot.manually_drop();
+        return value;
     }
 
     int fd() noexcept {
