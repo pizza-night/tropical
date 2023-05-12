@@ -15,7 +15,7 @@ class Socket {
     Socket& operator=(Socket const&) = delete;
     Socket& operator=(Socket&&) noexcept;
 
-    ~Socket() noexcept;
+    ~Socket();
 
     int fd() noexcept;
 

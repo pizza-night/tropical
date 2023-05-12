@@ -17,7 +17,7 @@ Socket& Socket::operator=(Socket&& other) noexcept {
     return *this;
 }
 
-Socket::~Socket() noexcept {
+Socket::~Socket() {
     if (m_fd != -1) {
         close(m_fd);
     }
