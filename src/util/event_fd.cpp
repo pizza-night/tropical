@@ -1,9 +1,7 @@
 #include "util/event_fd.hpp"
 
-extern "C" {
 #include <sys/eventfd.h>
 #include <unistd.h>
-}
 
 EventFd::EventFd() noexcept {
     m_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE);

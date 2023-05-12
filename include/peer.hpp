@@ -1,11 +1,8 @@
 #pragma once
 
+#include <netinet/in.h>
 #include <optional>
 #include <string>
-
-extern "C" {
-#include <netinet/in.h>
-}
 
 namespace tropical {
 

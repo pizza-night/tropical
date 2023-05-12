@@ -4,14 +4,11 @@
 
 #include <expected>
 #include <filesystem>
+#include <netinet/in.h>
 #include <span>
 #include <system_error>
 #include <variant>
 #include <vector>
-
-extern "C" {
-#include <netinet/in.h>
-}
 
 namespace tropical {
 
