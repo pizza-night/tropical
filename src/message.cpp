@@ -40,7 +40,7 @@ static_assert(
 
 static_assert(
     lte(std::variant_size_v<Message::Payload> - 1,
-        static_cast<std::uintmax_t>(max_idx) + 1),
+        static_cast<std::uintmax_t>(type_idx_max) + 1),
     "Too many message types"
 );
 
