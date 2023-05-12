@@ -143,7 +143,7 @@ struct PayloadSerializer {
 
 } // namespace
 
-void Message::serialize(std::vector<std::uint8_t> out) const {
+void Message::serialize_to(std::vector<std::uint8_t> out) const {
     // Write the message type.
     std::size_t type_idx = this->payload.index();
     assert(
@@ -159,8 +159,8 @@ void Message::serialize(std::vector<std::uint8_t> out) const {
     std::visit(PayloadSerializer(out), this->payload);
 }
 
-Message::DeserializeResult Message::deserialize(std::span<std::uint8_t const> in
-) {
+Message::DeserializeResult
+Message::deserialize_from(std::span<std::uint8_t const> in) {
     std::size_t const type_idx = ({
         TypeIdx type_idx;
         if (! read_int_be(in, type_idx)) {

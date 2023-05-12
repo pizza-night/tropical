@@ -20,9 +20,9 @@ class Message {
 
     Payload payload;
 
-    void serialize(std::vector<std::uint8_t> out) const;
+    void serialize_to(std::vector<std::uint8_t> out) const;
 
-    DeserializeResult deserialize(std::span<std::uint8_t const> in);
+    DeserializeResult deserialize_from(std::span<std::uint8_t const> in);
 };
 
 } // namespace tropical
