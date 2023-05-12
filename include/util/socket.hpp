@@ -19,7 +19,7 @@ class Socket {
 
     int fd() noexcept;
 
-    bool open() const noexcept;
+    bool is_open() const noexcept;
 
     std::error_code manually_drop() noexcept;
 

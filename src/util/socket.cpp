@@ -27,7 +27,7 @@ int Socket::fd() noexcept {
     return m_fd;
 }
 
-bool Socket::open() const noexcept {
+bool Socket::is_open() const noexcept {
     return m_fd != -1;
 }
 
