@@ -8,7 +8,7 @@ namespace tropical {
 
 struct Peer {
     std::string addr;
-    std::optional<in_port_t> port;
+    in_port_t port;
     std::optional<std::string> name;
 };
 

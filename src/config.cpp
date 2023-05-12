@@ -190,7 +190,7 @@ auto Config::load_from_path(std::filesystem::path path)
 
         peers.emplace_back(
             *std::move(address),
-            peer[key_port].value<in_port_t>(),
+            peer[key_port].value_or(*port),
             peer[key_name].value<std::string>()
         );
     }
