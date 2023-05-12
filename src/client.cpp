@@ -8,7 +8,6 @@
 
 #include "util/socket.hpp"
 
-#include <cstddef>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <span>

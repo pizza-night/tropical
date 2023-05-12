@@ -5,8 +5,6 @@
 #include "util/mpsc_queue.hpp"
 #include "util/spsc_queue.hpp"
 
-#include <expected>
-
 namespace tropical {
 
 void start_client(
