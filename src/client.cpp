@@ -7,6 +7,7 @@
 #include "client.hpp"
 
 #include "util/socket.hpp"
+#include "util/todo.hpp"
 
 #include <netdb.h>
 #include <netinet/in.h>
@@ -46,6 +47,17 @@ constexpr addrinfo lookup_hostname_hints = {
     .ai_next = nullptr,
 };
 
+void handle_connection(
+    Socket connection,
+    MpscQueue<Message>& tx_queue,
+    SpscQueue<Message>& rx_queue
+) {
+    (void) connection;
+    (void) tx_queue;
+    (void) rx_queue;
+    todo();
+}
+
 void make_connections(
     std::span<Peer const> const peers,
     std::vector<std::jthread>& connections,
@@ -63,7 +75,7 @@ void make_connections(
                 &numeric_hostname_hints,
                 &result
             );
-            // TODO: error handling
+            todo(); // TODO: error handling
 
             // Try again, this time with lookup.
             freeaddrinfo(result);
@@ -73,32 +85,31 @@ void make_connections(
                 &lookup_hostname_hints,
                 &result
             );
-            // TODO: error handling
+            todo(); // TODO: error handling
 
             for (addrinfo const* rp = result; rp != nullptr; rp = rp->ai_next) {
                 auto connection = Socket::from_fd(
                     socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)
                 );
                 if (not connection.is_open()) {
-                    // TODO: error handling
+                    todo(); // TODO: error handling
                     continue;
                 }
                 if (connect(connection.fd(), rp->ai_addr, rp->ai_addrlen)
                     == -1) {
-                    // TODO: error handling
+                    todo(); // TODO: error handling
                     continue;
                 }
+                handle_connection(std::move(connection), tx_queue, rx_queue);
+                break;
             }
 
             freeaddrinfo(result);
 
-            // Keep it alive.
-            (void) tx_queue;
-            (void) rx_queue;
-
             // At this point, we have tried to connect to all addresses
             // associated with the peer. If we have not succeeded, we should
             // probably give up.
+            todo(); // TODO: error handling
         });
     }
 }
@@ -126,11 +137,11 @@ void start_client(
             sizeof(bind_addr)
         )
         != 0) {
-        // TODO: error handling
+        todo(); // TODO: error handling
     }
 
     if (listen(server_sock.fd(), 1'024) != 0) {
-        // TODO: error handling
+        todo(); // TODO: error handling
     }
 
     for (;;) {
@@ -142,9 +153,11 @@ void start_client(
             &incoming_addr_len
         ));
         if (not connection.is_open()) {
-            // TODO: error handling
+            todo(); // TODO: error handling
         }
-        // TODO: handle connection
+        connections.emplace_back([&connection, &tx_queue, &rx_queue] {
+            handle_connection(std::move(connection), tx_queue, rx_queue);
+        });
     }
 }
 
