@@ -144,7 +144,7 @@ struct PayloadSerializer {
 
 } // namespace
 
-void Message::serialize_to(std::vector<std::uint8_t> out) const {
+void Message::serialize_to(std::vector<std::uint8_t>& out) const {
     // Write the message type.
     std::size_t type_idx = this->payload.index();
     assert(

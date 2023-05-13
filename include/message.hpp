@@ -20,7 +20,7 @@ class Message {
 
     Payload payload;
 
-    void serialize_to(std::vector<std::uint8_t> out) const;
+    void serialize_to(std::vector<std::uint8_t>& out) const;
 
     DeserializeResult deserialize_from(std::span<std::uint8_t const> in);
 };
