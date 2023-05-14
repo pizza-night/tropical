@@ -1,13 +1,22 @@
+// clang-format off
+// This include order is intentional.
+#include "spdlog_config.hpp"
+// clang-format on
+
 #include "config.hpp"
 #include "prog_info.hpp"
 #include "util/overload.hpp"
 
 #include <cstdlib>
 #include <cxxopts.hpp>
-#include <exception>
 #include <filesystem>
 #include <fmt/color.h>
 #include <fmt/core.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+#include <stdexcept>
+#include <utility>
 
 using namespace tropical;
 
@@ -32,6 +41,44 @@ using namespace tropical;
             __VA_OPT__(, ) __VA_ARGS__                                         \
     )
 
+namespace {
+
+void init_logger(bool const verbose) {
+    std::filesystem::path log_filename;
+
+    char const* const state_dir = std::getenv("XDG_STATE_HOME");
+    if (! state_dir) {
+        char const* const home_dir = std::getenv("HOME");
+        if (! home_dir) {
+            throw std::runtime_error("failed to find home directory");
+        }
+        log_filename.assign(home_dir).append(".local").append("state");
+    } else {
+        log_filename.assign(state_dir);
+    }
+    log_filename.append("tropical").append("tropical.log");
+
+    auto logger = std::make_shared<spdlog::logger>(
+        "tropical",                // logger name
+        std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+            log_filename.native(), // filename
+            1'048'576,             // 1 MiB max file size
+            3,                     // rotate up to 3 files
+            true                   // rotate on open
+        )
+    );
+
+    if (verbose) {
+        logger->sinks().emplace_back(
+            std::make_shared<spdlog::sinks::stdout_color_sink_mt>()
+        );
+    }
+
+    spdlog::set_default_logger(std::move(logger));
+}
+
+} // namespace
+
 int main(int argc, char* argv[]) try {
     auto cli_config
         = cxxopts::Options("tropical", "Implementation of the PIZZA protocol.");
@@ -44,6 +91,10 @@ int main(int argc, char* argv[]) try {
     )(
         "version",
         "Print version information and exit"
+    )(
+        "verbose",
+        "Log to stdout in addition to the log file",
+        cxxopts::value<bool>()->default_value("false")
     )(
         "config",
         "Specify the path to the configuration file",
@@ -86,6 +137,8 @@ int main(int argc, char* argv[]) try {
         return EXIT_SUCCESS;
     }
 
+    init_logger(cli_args["verbose"].as<bool>());
+
     bool const using_default_config = cli_args.count("config") == 0;
 
     std::expected config = using_default_config
@@ -108,7 +161,7 @@ int main(int argc, char* argv[]) try {
                         PROG_PRINT(
                             "to generate a default configuration, "
                             "run the following command with root privileges:\n"
-                            "tropical --generate-config\n"
+                            " tropical-- generate - config\n "
                         );
                     }
                 },
