@@ -3,6 +3,7 @@
 #include "config.hpp"
 
 #include <cerrno>
+#include <cstdlib>
 #include <fmt/os.h>
 #include <fstream>
 #include <ranges>
@@ -50,7 +51,7 @@ bool find_config_path(std::filesystem::path& path) {
         }
         path.assign(home_dir).append(".config");
     } else {
-        path = config_dir;
+        path.assign(config_dir);
     }
     path.append("tropical").append("config.toml");
     return true;
