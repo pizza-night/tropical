@@ -43,6 +43,9 @@ add_library("spscqueue" "${INCLUDE_PATH}/util/spsc_queue.hpp")
 set_target_properties("spscqueue" PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries("tropical" PRIVATE readerwriterqueue)
 
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries("tropical" PRIVATE spdlog::spdlog)
+
 # toml++
 find_package(tomlplusplus CONFIG REQUIRED)
 target_link_libraries("tropical" PRIVATE tomlplusplus::tomlplusplus)
