@@ -129,7 +129,9 @@ void start_client(
     sockaddr_in6 const bind_addr = {
         .sin6_family = AF_INET6,
         .sin6_port = config.port(),
+        .sin6_flowinfo = 0,
         .sin6_addr = IN6ADDR_ANY_INIT,
+        .sin6_scope_id = 0,
     };
     if (bind(
             server_sock.fd(),
