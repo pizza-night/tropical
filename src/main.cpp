@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) try {
                         PROG_PRINT(
                             "to generate a default configuration, "
                             "run the following command with root privileges:\n"
-                            " tropical-- generate - config\n "
+                            "tropical --generate-config\n "
                         );
                     }
                 },
