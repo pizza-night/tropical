@@ -160,6 +160,7 @@ void Message::serialize_to(std::vector<std::uint8_t>& out) const {
     std::visit(PayloadSerializer(out), this->payload);
 }
 
+[[nodiscard]]
 Message::DeserializeResult
 Message::deserialize_from(std::span<std::uint8_t const> in) {
     std::size_t const type_idx = ({

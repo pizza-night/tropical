@@ -34,6 +34,7 @@ class MpscQueue {
         return value;
     }
 
+    [[nodiscard]]
     int fd() noexcept {
         return this->event_fd.fd();
     }

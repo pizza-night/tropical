@@ -4,6 +4,7 @@
 #include <variant>
 
 template <typename VariantType, typename T, std::size_t idx = 0>
+[[nodiscard]]
 consteval std::size_t variant_idx() {
     static_assert(
         idx < std::variant_size_v<VariantType>,

@@ -17,11 +17,15 @@ class Socket {
 
     ~Socket();
 
+    [[nodiscard]]
     int fd() noexcept;
 
+    [[nodiscard]]
     bool is_open() const noexcept;
 
+    [[nodiscard]]
     std::error_code manually_drop() noexcept;
 
+    [[nodiscard]]
     static Socket from_fd(int) noexcept;
 };

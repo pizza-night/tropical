@@ -3,6 +3,7 @@
 #include <array>
 #include <cstring>
 
+[[nodiscard]]
 char const* strerror_mt(int const errnum) noexcept {
     static thread_local char buf[256];
     return strerror_r(errnum, buf, std::size(buf))

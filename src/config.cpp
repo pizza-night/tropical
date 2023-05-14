@@ -40,6 +40,7 @@ port = 2504
 peers = []
 )";
 
+[[nodiscard]]
 bool find_config_path(std::filesystem::path& path) {
     char const* const config_dir = std::getenv("XDG_CONFIG_HOME");
     if (! config_dir) {
@@ -82,6 +83,7 @@ Config::MissingPortErr::MissingPortErr(std::filesystem::path&& path) noexcept
 Config::Config(std::vector<Peer>&& peers, in_port_t const port) noexcept
   : m_peers(std::move(peers)), m_port(port) {}
 
+[[nodiscard]]
 auto Config::generate_default_config()
     -> std::expected<std::filesystem::path, IOErr> {
     std::filesystem::path config_dir;
@@ -103,6 +105,7 @@ auto Config::generate_default_config()
     return config_dir;
 }
 
+[[nodiscard]]
 auto Config::load_default() -> std::expected<Config, Error> {
     std::filesystem::path config_path;
     if (find_config_path(config_path)) {
@@ -128,6 +131,7 @@ USE_DEFAULT_CONFIG:
     return Config::load_from_path(std::move(config_path));
 }
 
+[[nodiscard]]
 auto Config::load_from_path(std::filesystem::path path)
     -> std::expected<Config, Error> {
     static constexpr std::string_view key_port = "port";
@@ -198,10 +202,12 @@ auto Config::load_from_path(std::filesystem::path path)
     return Config(std::move(peers), *port);
 }
 
+[[nodiscard]]
 auto Config::peers() const noexcept -> std::span<Peer const> {
     return m_peers;
 }
 
+[[nodiscard]]
 auto Config::port() const noexcept -> in_port_t {
     return m_port;
 }

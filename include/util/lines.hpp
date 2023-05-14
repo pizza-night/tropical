@@ -14,10 +14,12 @@ class Lines {
   public:
     struct Sentinel {};
 
+    [[nodiscard]]
     static Lines of(std::istream& input) noexcept;
 
     class LineIter begin() noexcept;
 
+    [[nodiscard]]
     Sentinel end() const noexcept;
 };
 
@@ -42,11 +44,15 @@ class LineIter {
     LineIter& operator=(LineIter const&) = delete;
     LineIter& operator=(LineIter&&) noexcept;
 
-    reference operator*() noexcept;
+    [[nodiscard]]
+    reference
+    operator*() noexcept;
 
-    pointer operator->() noexcept;
+    [[nodiscard]]
+    pointer
+    operator->() noexcept;
 
     LineIter& operator++();
 
-    bool operator==(Lines::Sentinel) const noexcept;
+    [[nodiscard]] bool operator==(Lines::Sentinel) const noexcept;
 };

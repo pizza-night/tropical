@@ -59,16 +59,21 @@ class Config {
 
     using Error = std::variant<IOErr, ParseErr, MissingPortErr>;
 
+    [[nodiscard]]
     static auto generate_default_config()
         -> std::expected<std::filesystem::path, IOErr>;
 
+    [[nodiscard]]
     static auto load_default() -> std::expected<Config, Error>;
 
+    [[nodiscard]]
     static auto load_from_path(std::filesystem::path config_path)
         -> std::expected<Config, Error>;
 
+    [[nodiscard]]
     auto peers() const noexcept -> std::span<Peer const>;
 
+    [[nodiscard]]
     auto port() const noexcept -> in_port_t;
 };
 

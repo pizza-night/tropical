@@ -22,6 +22,7 @@ class Message {
 
     void serialize_to(std::vector<std::uint8_t>& out) const;
 
+    [[nodiscard]]
     DeserializeResult deserialize_from(std::span<std::uint8_t const> in);
 };
 

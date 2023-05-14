@@ -23,14 +23,17 @@ Socket::~Socket() {
     }
 }
 
+[[nodiscard]]
 int Socket::fd() noexcept {
     return m_fd;
 }
 
+[[nodiscard]]
 bool Socket::is_open() const noexcept {
     return m_fd != -1;
 }
 
+[[nodiscard]]
 std::error_code Socket::manually_drop() noexcept {
     return std::error_code(
         (m_fd != -1 and close(m_fd) == -1) ? errno : 0,
@@ -38,6 +41,7 @@ std::error_code Socket::manually_drop() noexcept {
     );
 }
 
+[[nodiscard]]
 Socket Socket::from_fd(int const fd) noexcept {
     return Socket(fd);
 }

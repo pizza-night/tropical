@@ -20,6 +20,7 @@ void EventFd::mark_read() noexcept {
     eventfd_read(m_fd, &value);
 }
 
+[[nodiscard]]
 int EventFd::fd() noexcept {
     return m_fd;
 }

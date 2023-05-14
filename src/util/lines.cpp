@@ -5,6 +5,7 @@
 
 Lines::Lines(std::istream& input) noexcept : input(input) {}
 
+[[nodiscard]]
 Lines Lines::of(std::istream& input) noexcept {
     return Lines(input);
 }
@@ -13,6 +14,7 @@ LineIter Lines::begin() noexcept {
     return LineIter(this->input);
 }
 
+[[nodiscard]]
 Lines::Sentinel Lines::end() const noexcept {
     return Sentinel();
 }
@@ -33,10 +35,12 @@ LineIter& LineIter::operator=(LineIter&& other) noexcept {
     return *this;
 }
 
+[[nodiscard]]
 LineIter::reference LineIter::operator*() noexcept {
     return this->line_buf;
 }
 
+[[nodiscard]]
 LineIter::pointer LineIter::operator->() noexcept {
     return &(this->line_buf);
 }
@@ -48,6 +52,7 @@ LineIter& LineIter::operator++() {
     return *this;
 }
 
+[[nodiscard]]
 bool LineIter::operator==(Lines::Sentinel) const noexcept {
     return this->input == nullptr;
 }

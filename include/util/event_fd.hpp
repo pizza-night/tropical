@@ -7,7 +7,10 @@ class EventFd {
   public:
     EventFd() noexcept;
     ~EventFd();
+
     void mark_write() noexcept;
     void mark_read() noexcept;
+
+    [[nodiscard]]
     int fd() noexcept;
 };
