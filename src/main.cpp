@@ -43,7 +43,7 @@ using namespace tropical;
 
 namespace {
 
-void init_logger(bool const verbose) {
+bool init_logger(bool const verbose) try {
     std::filesystem::path log_filename;
 
     char const* const state_dir = std::getenv("XDG_STATE_HOME");
@@ -75,6 +75,10 @@ void init_logger(bool const verbose) {
     }
 
     spdlog::set_default_logger(std::move(logger));
+    return true;
+} catch (std::exception const& e) {
+    PROG_PRINT_ERR("failed to initialize logger: {}\n", e.what());
+    return false;
 }
 
 } // namespace
