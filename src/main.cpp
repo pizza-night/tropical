@@ -141,7 +141,9 @@ int main(int argc, char* argv[]) try {
         return EXIT_SUCCESS;
     }
 
-    init_logger(cli_args["verbose"].as<bool>());
+    if (! init_logger(cli_args["verbose"].as<bool>())) {
+        return EXIT_FAILURE;
+    }
 
     bool const using_default_config = cli_args.count("config") == 0;
 
