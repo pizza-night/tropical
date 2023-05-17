@@ -49,8 +49,8 @@ constexpr addrinfo lookup_hostname_hints = {
 
 void handle_connection(
     Socket connection,
-    MpscQueue<Message>& tx_queue,
-    SpscQueue<Message>& rx_queue
+    MpscQueue& tx_queue,
+    SpscQueue& rx_queue
 ) {
     (void) connection;
     (void) tx_queue;
@@ -61,8 +61,8 @@ void handle_connection(
 void make_connections(
     std::span<Peer const> const peers,
     std::vector<std::jthread>& connections,
-    MpscQueue<Message>& tx_queue,
-    SpscQueue<Message>& rx_queue
+    MpscQueue& tx_queue,
+    SpscQueue& rx_queue
 ) {
     connections.reserve(peers.size());
 
@@ -119,8 +119,8 @@ void make_connections(
 
 void start_client(
     Config const& config,
-    MpscQueue<Message>& tx_queue,
-    SpscQueue<Message>& rx_queue
+    MpscQueue& tx_queue,
+    SpscQueue& rx_queue
 ) {
     std::vector<std::jthread> connections;
     make_connections(config.peers(), connections, tx_queue, rx_queue);

@@ -39,7 +39,7 @@ FetchContent_Declare(
   GIT_TAG           master
 )
 FetchContent_MakeAvailable(readerwriterqueue)
-add_library("spscqueue" "${INCLUDE_PATH}/util/spsc_queue.hpp")
+add_library("spscqueue" "${INCLUDE_PATH}/spsc_queue.hpp")
 set_target_properties("spscqueue" PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries("tropical" PRIVATE readerwriterqueue)
 
@@ -54,10 +54,8 @@ target_link_libraries("tropical" PRIVATE tomlplusplus::tomlplusplus)
 target_precompile_headers("tropical" PRIVATE
     "${INCLUDE_PATH}/util/event_fd.hpp"
     "${INCLUDE_PATH}/util/lines.hpp"
-    "${INCLUDE_PATH}/util/mpsc_queue.hpp"
     "${INCLUDE_PATH}/util/overload.hpp"
     "${INCLUDE_PATH}/util/socket.hpp"
-    "${INCLUDE_PATH}/util/spsc_queue.hpp"
     "${INCLUDE_PATH}/util/strerror_mt.hpp"
     "${INCLUDE_PATH}/util/todo.hpp"
     "${INCLUDE_PATH}/util/uninit.hpp"
