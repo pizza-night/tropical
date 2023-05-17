@@ -37,9 +37,9 @@
 // WARNING: If the log pattern contains thread id (i.e, %t) while this flag is
 // on, zero will be logged as thread id.
 //
-#ifndef SPDLOG_NO_THREAD_ID
-#   define SPDLOG_NO_THREAD_ID
-#endif
+// #ifndef SPDLOG_NO_THREAD_ID
+// #   define SPDLOG_NO_THREAD_ID
+// #endif
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
