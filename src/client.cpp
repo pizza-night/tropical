@@ -85,6 +85,7 @@ void make_connections(
                 &lookup_hostname_hints,
                 &result
             );
+            (void) err;
             todo(); // TODO: error handling
 
             for (addrinfo const* rp = result; rp != nullptr; rp = rp->ai_next) {
