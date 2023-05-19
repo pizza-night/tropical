@@ -21,8 +21,7 @@ constexpr std::size_t type_idx_of = variant_idx<Message::Payload, T>();
 constexpr auto type_idx_max = std::numeric_limits<Message::TypeIdx>::max();
 
 static_assert(
-    std::is_same_v<std::uint8_t, char>
-        or std::is_same_v<std::uint8_t, unsigned char>,
+    std::is_same_v<u8, char> or std::is_same_v<u8, unsigned char>,
     "std::uint8_t must be a byte type"
 );
 
@@ -39,7 +38,7 @@ static_assert(
 
 static_assert(
     Message::text_msg_max_len <= Message::TextMsg().max_size(),
-    "Text message maximum length too large"
+    "Text message maximum length too big"
 );
 
 template <std::integral N>
@@ -80,7 +79,7 @@ constexpr bool read_int_be(std::span<u8 const> in, N& out) noexcept {
 }
 
 struct PayloadSerializer {
-    std::vector<std::uint8_t>& out;
+    std::vector<u8>& out;
 
     void operator()(std::monostate) const {
         std::unreachable();
@@ -93,15 +92,15 @@ struct PayloadSerializer {
         write_int_be(out, static_cast<Message::TextMsgLen>(len));
 
         // Write the string.
-        auto const s_begin = reinterpret_cast<std::uint8_t const*>(s.data());
-        auto const s_end = s_begin + len;
+        auto s_begin = reinterpret_cast<u8 const*>(s.data());
+        auto s_end = s_begin + len;
         out.insert(out.end(), s_begin, s_end);
     }
 };
 
 } // namespace
 
-void Message::serialize_to(std::vector<std::uint8_t>& out) const {
+void Message::serialize_to(std::vector<u8>& out) const {
     // Write the message type.
     std::size_t type_idx = this->payload.index();
     assert(
@@ -119,7 +118,7 @@ void Message::serialize_to(std::vector<std::uint8_t>& out) const {
 
 [[nodiscard]]
 std::expected<void, Message::DeserializeErr>
-Message::deserialize_from(std::span<std::uint8_t const> in) {
+Message::deserialize_from(std::span<u8 const> in) {
     std::size_t cursor = 0;
     TypeIdx type_idx;
     if (! read_int_be(in, type_idx)) {
@@ -129,10 +128,10 @@ Message::deserialize_from(std::span<std::uint8_t const> in) {
         });
     }
     cursor += sizeof(TypeIdx);
-    std::size_t const type_idx_usize = static_cast<std::size_t>(type_idx);
-    switch (type_idx_usize) {
+
+    switch (static_cast<std::size_t>(type_idx)) {
     case type_idx_of<TextMsg> - 1: {
-        Message::TextMsgLen len;
+        TextMsgLen len;
         if (! read_int_be(in.subspan(cursor), len)) {
             return std::unexpected(UnexpectedEofErr {
                 .cursor = cursor,
@@ -142,7 +141,7 @@ Message::deserialize_from(std::span<std::uint8_t const> in) {
         cursor += sizeof(TextMsgLen);
 
         if (not lte(len, Message::text_msg_max_len)) {
-            return std::unexpected(TextMsgTooLongErr {len});
+            return std::unexpected(TextMsgTooLongErr(len));
         }
 
         if (in.size() < len) {
@@ -167,7 +166,7 @@ Message::deserialize_from(std::span<std::uint8_t const> in) {
     }
         return {};
     default:
-        return std::unexpected(UnknownTypeErr {type_idx});
+        return std::unexpected(UnknownTypeErr(type_idx));
     }
 }
 
