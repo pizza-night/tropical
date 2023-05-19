@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/brief_int.hpp"
+
 #include <cstddef>
 #include <expected>
 #include <limits>
@@ -13,9 +15,9 @@ namespace tropical {
 
 class Message {
   public:
-    using TypeIdx = std::uint8_t;
+    using TypeIdx = u8;
     using TextMsg = std::string;
-    using TextMsgLen = std::uint16_t;
+    using TextMsgLen = u16;
     using Payload = std::variant<std::monostate, TextMsg>;
 
     struct UnexpectedEofErr {
@@ -39,11 +41,11 @@ class Message {
 
     Payload payload;
 
-    void serialize_to(std::vector<std::uint8_t>& out) const;
+    void serialize_to(std::vector<u8>& out) const;
 
     [[nodiscard]]
-    std::expected<void, DeserializeErr>
-    deserialize_from(std::span<std::uint8_t const> in);
+    std::expected<void, DeserializeErr> deserialize_from(std::span<u8 const> in
+    );
 };
 
 } // namespace tropical

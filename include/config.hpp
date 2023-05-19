@@ -1,6 +1,7 @@
 #pragma once
 
 #include "peer.hpp"
+#include "util/brief_int.hpp"
 
 #include <expected>
 #include <filesystem>
@@ -38,13 +39,13 @@ class Config {
         ParseErr(
             std::filesystem::path&& path,
             std::string&& reason,
-            std::uint32_t line
+            u32 line
         ) noexcept;
 
       public:
         std::filesystem::path path;
         std::string reason;
-        std::uint32_t line;
+        u32 line;
     };
 
     struct MissingPortErr {
