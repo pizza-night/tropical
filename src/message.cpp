@@ -2,8 +2,9 @@
 
 #include "util/variant_idx.hpp"
 
+#include <bit>
 #include <cassert>
-#include <endian.h>
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
@@ -41,78 +42,40 @@ static_assert(
     "Text message maximum length too large"
 );
 
-[[maybe_unused]]
-void write_int_be(std::vector<std::uint8_t>& out, std::uint8_t const n) {
-    out.push_back(n);
+template <std::integral N>
+constexpr void write_int_be(std::vector<u8>& out, N n) {
+    static constexpr auto host_to_be = [](N n) noexcept {
+        if constexpr (std::endian::native == std::endian::big) {
+            return n;
+        } else {
+            return std::byteswap(n);
+        }
+    };
+
+    if constexpr (std::is_same_v<N, u8>) {
+        out.push_back(n);
+    } else {
+        N n_be = host_to_be(n);
+        u8* n_beg = reinterpret_cast<u8*>(&n_be);
+        u8* n_end = n_beg + sizeof(n_be);
+        out.insert(out.end(), n_beg, n_end);
+    }
 }
 
-[[maybe_unused]]
-void write_int_be(std::vector<std::uint8_t>& out, std::uint16_t const n) {
-    std::uint16_t const n_be = htobe16(n);
-    auto const n_begin = reinterpret_cast<std::uint8_t const*>(&n_be);
-    auto const n_end = n_begin + sizeof(n_be);
-    out.insert(out.end(), n_begin, n_end);
-}
+template <std::integral N>
+constexpr bool read_int_be(std::span<u8 const> in, N& out) noexcept {
+    static constexpr auto be_to_host = [](N n) noexcept {
+        if constexpr (std::endian::native == std::endian::big) {
+            return n;
+        } else {
+            return std::byteswap(n);
+        }
+    };
 
-[[maybe_unused]]
-void write_int_be(std::vector<std::uint8_t>& out, std::uint32_t const n) {
-    std::uint32_t const n_be = htobe32(n);
-    auto const n_begin = reinterpret_cast<std::uint8_t const*>(&n_be);
-    auto const n_end = n_begin + sizeof(n_be);
-    out.insert(out.end(), n_begin, n_end);
-}
-
-[[maybe_unused]]
-void write_int_be(std::vector<std::uint8_t>& out, std::uint64_t const n) {
-    std::uint64_t const n_be = htobe64(n);
-    auto const n_begin = reinterpret_cast<std::uint8_t const*>(&n_be);
-    auto const n_end = n_begin + sizeof(n_be);
-    out.insert(out.end(), n_begin, n_end);
-}
-
-[[maybe_unused]]
-constexpr bool
-read_int_be(std::span<std::uint8_t const>& in, std::uint8_t& out) noexcept {
-    if (in.size() < sizeof(out)) {
+    if (in.size() < sizeof(N)) {
         return false;
     }
-    out = in[0];
-    return true;
-}
-
-[[maybe_unused]]
-constexpr bool read_int_be(
-    std::span<std::uint8_t const> const in,
-    std::uint16_t& out
-) noexcept {
-    if (in.size() < sizeof(out)) {
-        return false;
-    }
-    out = be16toh(*reinterpret_cast<std::uint16_t const*>(in.data()));
-    return true;
-}
-
-[[maybe_unused]]
-constexpr bool read_int_be(
-    std::span<std::uint8_t const> const in,
-    std::uint32_t& out
-) noexcept {
-    if (in.size() < sizeof(out)) {
-        return false;
-    }
-    out = be32toh(*reinterpret_cast<std::uint32_t const*>(in.data()));
-    return true;
-}
-
-[[maybe_unused]]
-constexpr bool read_int_be(
-    std::span<std::uint8_t const> const in,
-    std::uint64_t& out
-) noexcept {
-    if (in.size() < sizeof(out)) {
-        return false;
-    }
-    out = be64toh(*reinterpret_cast<std::uint64_t const*>(in.data()));
+    out = be_to_host(*reinterpret_cast<N const*>(in.data()));
     return true;
 }
 
