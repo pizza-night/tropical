@@ -26,8 +26,6 @@ MpscQueue& MpscQueue::operator=(MpscQueue&& other) noexcept {
     return *this;
 }
 
-MpscQueue::~MpscQueue() = default;
-
 void MpscQueue::enqueue(Message msg) {
     if (! this->pimpl->queue.enqueue(std::move(msg))) {
         throw std::bad_alloc();

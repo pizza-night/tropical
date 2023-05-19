@@ -20,8 +20,6 @@ class SpscQueue {
     SpscQueue& operator=(SpscQueue const&) = delete;
     SpscQueue& operator=(SpscQueue&&) noexcept;
 
-    ~SpscQueue();
-
     void enqueue(Message);
 
     void dequeue(Message&);

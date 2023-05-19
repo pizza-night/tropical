@@ -20,8 +20,6 @@ class MpscQueue {
     MpscQueue& operator=(MpscQueue const&) = delete;
     MpscQueue& operator=(MpscQueue&&) noexcept;
 
-    ~MpscQueue();
-
     void enqueue(Message);
 
     void dequeue(Message&);

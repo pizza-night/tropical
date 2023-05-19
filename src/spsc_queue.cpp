@@ -26,8 +26,6 @@ SpscQueue& SpscQueue::operator=(SpscQueue&& other) noexcept {
     return *this;
 }
 
-SpscQueue::~SpscQueue() = default;
-
 void SpscQueue::enqueue(Message msg) {
     if (! this->pimpl->queue.enqueue(std::move(msg))) {
         throw std::bad_alloc();
