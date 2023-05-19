@@ -44,6 +44,6 @@ std::error_code Socket::manually_close() noexcept {
 }
 
 [[nodiscard]]
-Socket Socket::from_fd(int const fd) noexcept {
+Socket Socket::from_fd(int fd) noexcept {
     return Socket(fd);
 }

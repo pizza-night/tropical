@@ -43,12 +43,12 @@ using namespace tropical;
 
 namespace {
 
-bool init_logger(bool const verbose) try {
+bool init_logger(bool verbose) try {
     std::filesystem::path log_filename;
 
-    char const* const state_dir = std::getenv("XDG_STATE_HOME");
+    char const* state_dir = std::getenv("XDG_STATE_HOME");
     if (! state_dir) {
-        char const* const home_dir = std::getenv("HOME");
+        char const* home_dir = std::getenv("HOME");
         if (! home_dir) {
             throw std::runtime_error("failed to find home directory");
         }
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) try {
         return EXIT_FAILURE;
     }
 
-    bool const using_default_config = cli_args.count("config") == 0;
+    bool using_default_config = cli_args.count("config") == 0;
 
     std::expected config = using_default_config
                              ? Config::load_default()

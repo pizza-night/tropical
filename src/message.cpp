@@ -87,7 +87,7 @@ struct PayloadSerializer {
 
     void operator()(Message::TextMsg const& s) const {
         // Write the string length.
-        std::size_t const len = s.length();
+        std::size_t len = s.length();
         assert(lte(len, Message::text_msg_max_len) && "Text message too long");
         write_int_be(out, static_cast<Message::TextMsgLen>(len));
 
@@ -151,10 +151,9 @@ Message::deserialize_from(std::span<u8 const> in) {
             });
         }
 
-        auto const s_begin
-            = reinterpret_cast<char const*>(in.subspan(cursor).data());
-        char const* const s_end = s_begin + len;
-        if (auto* const old_text_msg = std::get_if<TextMsg>(&this->payload);
+        auto s_begin = reinterpret_cast<char const*>(in.subspan(cursor).data());
+        auto s_end = s_begin + len;
+        if (auto* old_text_msg = std::get_if<TextMsg>(&this->payload);
             old_text_msg != nullptr) {
             // Reuse the existing buffer.
             old_text_msg->assign(s_begin, s_end);

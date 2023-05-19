@@ -6,7 +6,7 @@
 #include <fmt/core.h>
 
 [[noreturn]]
-void todo(std::source_location const loc) {
+void todo(std::source_location loc) {
     fmt::print(
         stderr,
         "{} {}\n"

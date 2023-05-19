@@ -46,9 +46,9 @@ peers = []
 
 [[nodiscard]]
 bool find_config_path(std::filesystem::path& path) {
-    char const* const config_dir = std::getenv("XDG_CONFIG_HOME");
+    char const* config_dir = std::getenv("XDG_CONFIG_HOME");
     if (! config_dir) {
-        char const* const home_dir = std::getenv("HOME");
+        char const* home_dir = std::getenv("HOME");
         if (! home_dir) {
             return false;
         }
@@ -103,12 +103,12 @@ auto Config::load_default() -> std::expected<Config, Error> {
         // ~/.config/tropical/config.toml path is valid, try to load it.
         std::expected config = Config::load_from_path(std::move(config_path));
         if (! config) {
-            // If loading the config failed, check if the error was that the
-            // file didn't exist. If so, try to load the default config.
-            Error& err = config.error();
-            IOErr* const io_err = std::get_if<IOErr>(&err);
-            if (io_err != nullptr
-                and io_err->kind == std::errc::no_such_file_or_directory) {
+            // Loading config failed, check if the error was that the file
+            // didn't exist. If so, try to load the default config.
+            auto& err = config.error();
+            auto* io_err = std::get_if<IOErr>(&err);
+            if (io_err
+                and io_err->code == std::errc::no_such_file_or_directory) {
                 // Reuse the path from the error to avoid having to allocate a
                 // new path.
                 config_path = std::move(io_err->path);
@@ -155,7 +155,7 @@ auto Config::load_from_path(std::filesystem::path path)
     }
 
     std::vector<Peer> peers;
-    toml::array const* const peers_array = config[key_peers].as_array();
+    toml::array const* peers_array = config[key_peers].as_array();
     if (! peers_array) {
         return Config {
             .peers = std::move(peers),
