@@ -56,6 +56,7 @@ target_precompile_headers("tropical" PRIVATE
     "${INCLUDE_PATH}/util/event_fd.hpp"
     "${INCLUDE_PATH}/util/errno_ec.hpp"
     "${INCLUDE_PATH}/util/lines.hpp"
+    "${INCLUDE_PATH}/util/match.hpp"
     "${INCLUDE_PATH}/util/overload.hpp"
     "${INCLUDE_PATH}/util/socket.hpp"
     "${INCLUDE_PATH}/util/strerror_mt.hpp"
