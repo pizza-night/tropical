@@ -5,7 +5,7 @@
 
 #include "config.hpp"
 #include "prog_info.hpp"
-#include "util/overload.hpp"
+#include "util/match.hpp"
 
 #include <cstdlib>
 #include <cxxopts.hpp>
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) try {
     }
 
     if (cli_args.count("generate-config") > 0) {
-        auto res = Config::generate_default_config();
+        std::expected res = Config::generate_default_config();
         if (! res) {
             auto const& [path, err] = res.error();
             PROG_PRINT_ERR(
@@ -155,38 +155,36 @@ int main(int argc, char* argv[]) try {
 
     if (! config) {
         auto const& err = config.error();
-        std::visit(
-            overload {
-                [using_default_config](Config::IOErr const& err) {
-                    PROG_PRINT_ERR(
-                        "failed to load configuration '{}': {}\n",
-                        err.path.native(),
-                        err.kind.message()
+        match(
+            err,
+            [using_default_config](Config::IOErr const& err) {
+                PROG_PRINT_ERR(
+                    "failed to load configuration '{}': {}\n",
+                    err.path.native(),
+                    err.code.message()
+                );
+                if (using_default_config) {
+                    PROG_PRINT(
+                        "to generate a default configuration, "
+                        "run the following command with root privileges:\n"
+                        "tropical --generate-config\n "
                     );
-                    if (using_default_config) {
-                        PROG_PRINT(
-                            "to generate a default configuration, "
-                            "run the following command with root privileges:\n"
-                            "tropical --generate-config\n "
-                        );
-                    }
-                },
-                [](Config::ParseErr const& err) {
-                    PROG_PRINT_ERR(
-                        "failed to parse configuration {}:{}: {}\n",
-                        err.path.native(),
-                        err.line,
-                        err.reason
-                    );
-                },
-                [](Config::MissingPortErr const& err) {
-                    PROG_PRINT_ERR(
-                        "missing port in configuration '{}'\n",
-                        err.path.native()
-                    );
-                },
+                }
             },
-            err
+            [](Config::ParseErr const& err) {
+                PROG_PRINT_ERR(
+                    "failed to parse configuration {}:{}: {}\n",
+                    err.path.native(),
+                    err.line,
+                    err.reason
+                );
+            },
+            [](Config::MissingPortErr const& err) {
+                PROG_PRINT_ERR(
+                    "missing port in configuration '{}'\n",
+                    err.path.native()
+                );
+            }
         );
         return EXIT_FAILURE;
     }
