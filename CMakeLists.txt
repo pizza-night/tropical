@@ -61,7 +61,6 @@ target_precompile_headers("tropical" PRIVATE
     "${INCLUDE_PATH}/util/socket.hpp"
     "${INCLUDE_PATH}/util/strerror_mt.hpp"
     "${INCLUDE_PATH}/util/todo.hpp"
-    "${INCLUDE_PATH}/util/uninit.hpp"
     "${INCLUDE_PATH}/util/variant_idx.hpp"
     "<arpa/inet.h>"
     "<array>"
