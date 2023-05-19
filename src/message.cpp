@@ -3,9 +3,7 @@
 #include "util/variant_idx.hpp"
 
 #include <cassert>
-#include <cstdint>
 #include <endian.h>
-#include <limits>
 #include <type_traits>
 #include <utility>
 
