@@ -1,3 +1,5 @@
+// This macro must be defined before toml++ is included to use the
+// toml::parse_result API instead of exceptions.
 #define TOML_EXCEPTIONS 0
 
 #include "config.hpp"
@@ -66,25 +68,6 @@ void find_default_config_path(std::filesystem::path& path) {
 
 } // namespace
 
-Config::IOErr::IOErr(
-    std::filesystem::path&& path,
-    std::error_code const kind
-) noexcept
-  : path(std::move(path)), kind(kind) {}
-
-Config::ParseErr::ParseErr(
-    std::filesystem::path&& path,
-    std::string&& reason,
-    std::uint32_t const line
-) noexcept
-  : path(std::move(path)), reason(std::move(reason)), line(line) {}
-
-Config::MissingPortErr::MissingPortErr(std::filesystem::path&& path) noexcept
-  : path(std::move(path)) {}
-
-Config::Config(std::vector<Peer>&& peers, in_port_t const port) noexcept
-  : m_peers(std::move(peers)), m_port(port) {}
-
 [[nodiscard]]
 auto Config::generate_default_config()
     -> std::expected<std::filesystem::path, IOErr> {
@@ -94,14 +77,20 @@ auto Config::generate_default_config()
     std::error_code err;
     if (! std::filesystem::create_directories(config_dir.parent_path(), err)
         and err) {
-        return std::unexpected(IOErr(std::move(config_dir), err));
+        return std::unexpected(IOErr {
+            .path = std::move(config_dir),
+            .code = err,
+        });
     }
 
     try {
         fmt::output_file(config_dir.native())
             .print("{}", default_config_contents);
     } catch (std::system_error const& e) {
-        return std::unexpected(IOErr(std::move(config_dir), e.code()));
+        return std::unexpected(IOErr {
+            .path = std::move(config_dir),
+            .code = e.code(),
+        });
     }
 
     return config_dir;
@@ -143,39 +132,43 @@ auto Config::load_from_path(std::filesystem::path path)
 
     auto file = std::ifstream(path);
     if (! file) {
-        return std::unexpected(IOErr(
-            std::move(path),
-            std::error_code(errno, std::system_category())
-        ));
+        return std::unexpected(IOErr {
+            .path = std::move(path),
+            .code = errno_ec(),
+        });
     }
+
     toml::parse_result res = toml::parse(file);
     if (res.failed()) {
         toml::parse_error& err = res.error();
-        return std::unexpected(ParseErr(
-            std::move(path),
-            std::string(err.description()),
-            err.source().begin.line
-        ));
+        return std::unexpected(ParseErr {
+            .path = std::move(path),
+            .reason = std::string(err.description()),
+            .line = err.source().begin.line,
+        });
     }
 
     toml::table const& config = res.table();
     std::optional port = config[key_port].value<in_port_t>();
     if (! port) {
-        return std::unexpected(MissingPortErr(std::move(path)));
+        return std::unexpected(MissingPortErr {.path = std::move(path)});
     }
 
     std::vector<Peer> peers;
     toml::array const* const peers_array = config[key_peers].as_array();
     if (! peers_array) {
-        return Config(std::move(peers), *port);
+        return Config {
+            .peers = std::move(peers),
+            .port = *port,
+        };
     }
 
-    if (not (peers_array->empty() or peers_array->is_array_of_tables())) {
-        return std::unexpected(ParseErr(
-            std::move(path),
-            "expected 'peers' to be an array of tables",
-            config.source().begin.line
-        ));
+    if (not peers_array->empty() and not peers_array->is_array_of_tables()) {
+        return std::unexpected(ParseErr {
+            .path = std::move(path),
+            .reason = "expected 'peers' to be an array of tables",
+            .line = config.source().begin.line,
+        });
     }
 
     static constexpr auto to_table
@@ -187,11 +180,11 @@ auto Config::load_from_path(std::filesystem::path path)
         std::optional address = peer[key_addr].value<std::string>();
 
         if (! address) {
-            return std::unexpected(ParseErr(
-                std::move(path),
-                "missing 'address' field in peer",
-                peer.source().begin.line
-            ));
+            return std::unexpected(ParseErr {
+                .path = std::move(path),
+                .reason = "missing 'address' field in peer",
+                .line = peer.source().begin.line,
+            });
         }
 
         peers.emplace_back(
@@ -201,17 +194,10 @@ auto Config::load_from_path(std::filesystem::path path)
         );
     }
 
-    return Config(std::move(peers), *port);
-}
-
-[[nodiscard]]
-auto Config::peers() const noexcept -> std::span<Peer const> {
-    return m_peers;
-}
-
-[[nodiscard]]
-auto Config::port() const noexcept -> in_port_t {
-    return m_port;
+    return Config {
+        .peers = std::move(peers),
+        .port = *port,
+    };
 }
 
 } // namespace tropical
