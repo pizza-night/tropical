@@ -24,7 +24,7 @@ class Socket {
     bool is_open() const noexcept;
 
     [[nodiscard]]
-    std::error_code manually_drop() noexcept;
+    std::error_code manually_close() noexcept;
 
     [[nodiscard]]
     static Socket from_fd(int) noexcept;

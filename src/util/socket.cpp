@@ -36,7 +36,7 @@ bool Socket::is_open() const noexcept {
 }
 
 [[nodiscard]]
-std::error_code Socket::manually_drop() noexcept {
+std::error_code Socket::manually_close() noexcept {
     if (m_fd != -1 and close(m_fd) == -1) {
         return errno_ec();
     }
