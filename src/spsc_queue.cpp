@@ -18,13 +18,9 @@ SpscQueue::SpscQueue() {
     this->pimpl = std::make_unique<Impl>();
 }
 
-SpscQueue::SpscQueue(SpscQueue&& other) noexcept
-  : pimpl(std::move(other.pimpl)) {}
+SpscQueue::SpscQueue(SpscQueue&& other) = default;
 
-SpscQueue& SpscQueue::operator=(SpscQueue&& other) noexcept {
-    this->pimpl = std::move(other.pimpl);
-    return *this;
-}
+SpscQueue& SpscQueue::operator=(SpscQueue&& other) = default;
 
 void SpscQueue::enqueue(Message msg) {
     if (! this->pimpl->queue.enqueue(std::move(msg))) {

@@ -18,13 +18,9 @@ MpscQueue::MpscQueue() {
     this->pimpl = std::make_unique<Impl>();
 }
 
-MpscQueue::MpscQueue(MpscQueue&& other) noexcept
-  : pimpl(std::move(other.pimpl)) {}
+MpscQueue::MpscQueue(MpscQueue&& other) = default;
 
-MpscQueue& MpscQueue::operator=(MpscQueue&& other) noexcept {
-    this->pimpl = std::move(other.pimpl);
-    return *this;
-}
+MpscQueue& MpscQueue::operator=(MpscQueue&& other) = default;
 
 void MpscQueue::enqueue(Message msg) {
     if (! this->pimpl->queue.enqueue(std::move(msg))) {
