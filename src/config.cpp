@@ -45,23 +45,23 @@ peers = []
 )";
 
 [[nodiscard]]
-bool find_config_path(std::filesystem::path& path) {
+bool find_config_path(std::filesystem::path& out) {
     char const* config_dir = std::getenv("XDG_CONFIG_HOME");
     if (! config_dir) {
         char const* home_dir = std::getenv("HOME");
         if (! home_dir) {
             return false;
         }
-        path.assign(home_dir).append(".config");
+        out.assign(home_dir).append(".config");
     } else {
-        path.assign(config_dir);
+        out.assign(config_dir);
     }
-    path.append("tropical").append("config.toml");
+    out.append("tropical").append("config.toml");
     return true;
 }
 
-void find_default_config_path(std::filesystem::path& path) {
-    path.assign(std::getenv("$XDG_CONFIG_DIRS") ?: "/etc/xdg")
+void find_default_config_path(std::filesystem::path& out) {
+    out.assign(std::getenv("$XDG_CONFIG_DIRS") ?: "/etc/xdg")
         .append("tropical")
         .append("config.toml");
 }
