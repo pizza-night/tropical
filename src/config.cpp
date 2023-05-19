@@ -2,7 +2,8 @@
 
 #include "config.hpp"
 
-#include <cerrno>
+#include "util/errno_ec.hpp"
+
 #include <cstdlib>
 #include <fmt/os.h>
 #include <fstream>

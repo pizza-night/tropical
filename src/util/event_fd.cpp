@@ -1,5 +1,7 @@
 #include "util/event_fd.hpp"
 
+#include "util/errno_ec.hpp"
+
 #include <sys/eventfd.h>
 #include <unistd.h>
 
@@ -28,10 +30,10 @@ EventFd::~EventFd() {
 
 [[nodiscard]]
 std::error_code EventFd::manually_close() noexcept {
-    return std::error_code(
-        (m_fd != -1 and close(m_fd) == -1) ? errno : 0,
-        std::system_category()
-    );
+    if (m_fd != -1 and close(m_fd) == -1) {
+        return errno_ec();
+    }
+    return std::error_code();
 }
 
 void EventFd::mark_write() noexcept {

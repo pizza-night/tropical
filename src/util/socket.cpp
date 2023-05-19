@@ -1,5 +1,7 @@
 #include "util/socket.hpp"
 
+#include "util/errno_ec.hpp"
+
 #include <unistd.h>
 
 Socket::Socket(int const fd) noexcept : m_fd(fd) {}
@@ -35,10 +37,10 @@ bool Socket::is_open() const noexcept {
 
 [[nodiscard]]
 std::error_code Socket::manually_drop() noexcept {
-    return std::error_code(
-        (m_fd != -1 and close(m_fd) == -1) ? errno : 0,
-        std::system_category()
-    );
+    if (m_fd != -1 and close(m_fd) == -1) {
+        return errno_ec();
+    }
+    return std::error_code();
 }
 
 [[nodiscard]]
